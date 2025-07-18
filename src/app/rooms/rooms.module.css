@@ -6,6 +6,7 @@
   align-items: center;
   flex-direction: column;
   gap: 2rem;
+  color: rgba(17, 72, 189, 0.988);
 }
 
 .title {

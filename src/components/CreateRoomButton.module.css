@@ -1,0 +1,14 @@
+.createRoomButton {
+  font-size: 1rem;
+  box-sizing: border-box;
+  padding: 0.5rem 1rem 0.5rem 1rem;
+  border-radius: 2rem;
+  border: none;
+  cursor: pointer;
+  background-color: rgba(43, 102, 228, 0.988);
+  color: white;
+}
+
+.createRoomButton:hover {
+  background-color: rgba(71, 119, 223, 0.988)
+}

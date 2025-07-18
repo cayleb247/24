@@ -3,6 +3,7 @@
 import { useState } from "react";
 import styles from "./rooms.module.css";
 import RoomsList from "@/components/RoomsList";
+import CreateRoomButton from "@/components/CreateRoomButton";
 
 export default function Rooms() {
   const [search, setSearch] = useState(null);
@@ -21,7 +22,8 @@ export default function Rooms() {
         }
         }
         />
-        <RoomsList></RoomsList>
+        <RoomsList search={search}></RoomsList>
+        <CreateRoomButton></CreateRoomButton>
       </div>
     </div>
   );
