@@ -1,8 +1,11 @@
 .roomsListContainer {
+    display: flex;
+    flex-direction: column;
     width: 100%;
     height: 100%;
     background-color: rgb(77, 77, 77);
     border-radius: 0.5rem;
     box-sizing: border-box;
     padding: 0.5rem;
+    gap: 0.25rem;
 }

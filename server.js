@@ -15,7 +15,26 @@ app.prepare().then(() => {
   const io = new Server(httpServer);
 
   io.on("connection", (socket) => {
-    // ...
+    console.log(`User connected: ${socket.id}`);
+
+    socket.on("room creation", (roomName) => {
+
+      const rooms = io.sockets.adapter.rooms;
+      let customRooms = [];
+      for (let [roomName, room] of rooms) {
+        // If the room name matches a socket ID, skip it
+        if (io.sockets.sockets.get(roomName)) continue;
+
+        customRooms.push(roomName);
+      }
+
+      console.log(customRooms);
+      if (customRooms.includes(roomName)) {
+        socket.emit("room name taken");
+      }
+
+      socket.join(roomName);
+    });
   });
 
   httpServer
