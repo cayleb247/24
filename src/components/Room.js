@@ -1,4 +1,9 @@
+import { redirect } from 'next/navigation';
 import styles from './Room.module.css'
+
+function joinRoom(roomName) {
+    redirect('/play')
+}
 
 
 export default function Room(props) {

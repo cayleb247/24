@@ -1,0 +1,5 @@
+.playContainer {
+    height: 100vh;
+    width: 100vw;
+    display: grid;
+}

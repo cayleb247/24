@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 export default function RoomsList(props) {
   const [search, setSearch] = useState(props.search);
   const [rooms, setRooms] = useState([]);
+
   useEffect(() => {
     socket.emit("request rooms");
     const handleRooms = (rooms) => {
@@ -20,10 +21,14 @@ export default function RoomsList(props) {
     };
   }, []); // Only run once on mount
 
+  const filtered = rooms.filter((roomName) =>
+    roomName.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className={styles.roomsListContainer}>
       <p onClick={() => socket.emit("request rooms")}>refresh</p>
-      {rooms.map((room) => (
+      {filtered.map((room) => (
         <Room key={room} roomName={room} />
       ))}
     </div>
