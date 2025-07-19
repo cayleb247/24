@@ -47,7 +47,7 @@
 }
 
 .dialogContainer form button:hover {
-  background-color: rgba(71, 119, 223, 0.988)
+  background-color: rgba(71, 119, 223, 0.988);
 }
 
 .inputContainer {
@@ -60,8 +60,11 @@
 .closeButton {
     font-size: 0.75rem;
     color: rgb(80, 80, 80);
-    text-decoration: underline;
     cursor: pointer;
+}
+
+.closeButton:hover {
+    text-decoration: underline;
 }
 
 .privacyContainer {

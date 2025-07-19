@@ -7,7 +7,7 @@ import CreateRoomDialog from "@/components/CreateRoomDialog";
 import { socket } from "@/socket.js"
 
 export default function Rooms() {
-  const [search, setSearch] = useState(null);
+  const [search, setSearch] = useState("");
   const [dialogOpen, toggleDialog] = useState(false);
 
   useEffect(() => {

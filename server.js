@@ -9,6 +9,8 @@ const port = 3000;
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
+const roomsMeta = new Map();
+
 app.prepare().then(() => {
   const httpServer = createServer(handler);
 
@@ -17,8 +19,20 @@ app.prepare().then(() => {
   io.on("connection", (socket) => {
     console.log(`User connected: ${socket.id}`);
 
-    socket.on("room creation", (roomName) => {
+    socket.on("request rooms", () => {
+      const rooms = io.sockets.adapter.rooms;
+      let customRooms = [];
+      for (let [roomName, room] of rooms) {
+        // If the room name matches a socket ID, skip it
+        if (io.sockets.sockets.get(roomName)) continue;
 
+        customRooms.push(roomName);
+      }
+
+      socket.emit("send rooms", customRooms)
+    });
+
+    socket.on("room creation", (roomName) => {
       const rooms = io.sockets.adapter.rooms;
       let customRooms = [];
       for (let [roomName, room] of rooms) {
@@ -31,6 +45,9 @@ app.prepare().then(() => {
       console.log(customRooms);
       if (customRooms.includes(roomName)) {
         socket.emit("room name taken");
+        return;
+      } else {
+        socket.emit("room made successfully");
       }
 
       socket.join(roomName);

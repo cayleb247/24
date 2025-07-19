@@ -6,7 +6,7 @@ export default function Room(props) {
 
   return (
     <div className={styles.roomContainer}>
-        <h3>hi</h3>
+        <h3>{props.roomName}</h3>
         <button>Join</button>
     </div>
   );

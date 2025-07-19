@@ -18,14 +18,20 @@ export default function CreateRoomDialog(props) {
   }
 
   function createRoom(event) {
+    setRoomNameTaken(false); // room name isn't taken originally - later to be checked if repeat
     event.preventDefault();
     const formData = new FormData(event.target); // event.target is the <form>
     const roomName = formData.get("roomName");
     socket.emit("room creation", roomName);
+
   }
 
   socket.on('room name taken', () => {
     setRoomNameTaken(true);
+  })
+
+  socket.on('room made successfully', () => {
+    closeDialog();
   })
 
   return (
@@ -39,7 +45,7 @@ export default function CreateRoomDialog(props) {
             id="roomName"
             placeholder="room name"
           />
-          {roomNameTaken && <p>room name taken</p>}
+          {roomNameTaken && <p style={{color: "rgb(209, 48, 48)", fontStyle: "italic"}}>room name taken</p>}
         </div>
 
         <div className={styles.privacyContainer}>
