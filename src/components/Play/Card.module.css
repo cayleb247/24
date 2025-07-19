@@ -1,0 +1,7 @@
+.cardsContainer {
+    box-sizing: border-box;
+    padding: 1rem;
+    border: 1px solid black;
+    border-radius: 1rem;
+    background-color: white;
+}
