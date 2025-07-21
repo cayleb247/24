@@ -52,6 +52,45 @@ app.prepare().then(() => {
 
       socket.join(roomName);
     });
+
+    socket.on("request room full", (slug) => {
+
+        const room = io.sockets.adapter.rooms.get(slug);
+        // console.log('room ', room)
+
+        // console.log(room.size);
+
+        let roomFull;
+        if (!room) {
+            roomFull = null;
+        } else if (room.size > 2) { // room size is compared after room has been joined (room.size = 1 during new room, etc.)
+            roomFull = true;
+        } else if (room.size <= 2) {
+            roomFull= false;
+        }
+        console.log(roomFull);
+        socket.emit("receive room full", roomFull)
+    })
+
+    socket.on("request room members", (slug) => {
+        const room = io.sockets.adapter.rooms.get(slug);
+        socket.emit('return room members', Array.from(room));
+    })
+
+    socket.on("request room join", (roomName) => {
+        console.log('request for room join received');
+        const room = io.sockets.adapter.rooms.get(roomName);
+        
+        if (room && room.size < 2) {
+            console.log('join room success');
+            socket.join(roomName);
+            socket.emit("join room", "successful");
+            socket.to(roomName).emit("start game")
+        } else {
+            console.log('join room failed');
+            socket.emit("join room", "failure");
+        }
+    })
   });
 
   httpServer

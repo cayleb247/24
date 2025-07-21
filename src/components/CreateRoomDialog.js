@@ -1,8 +1,13 @@
 import { useState, useRef } from "react";
 import styles from "./CreateRoomDialog.module.css";
 import { socket } from "@/socket.js";
+import { useRouter } from "next/navigation";
 
-export default function CreateRoomDialog(props) {
+export default function CreateRoomDialog(props) {  
+  const router = useRouter();
+
+  let roomName;  
+  
   const [isPrivate, togglePrivate] = useState(false);
   const [roomNameTaken, setRoomNameTaken] = useState(false);
 
@@ -21,7 +26,7 @@ export default function CreateRoomDialog(props) {
     setRoomNameTaken(false); // room name isn't taken originally - later to be checked if repeat
     event.preventDefault();
     const formData = new FormData(event.target); // event.target is the <form>
-    const roomName = formData.get("roomName");
+    roomName = formData.get("roomName");
     socket.emit("room creation", roomName);
 
   }
@@ -32,6 +37,7 @@ export default function CreateRoomDialog(props) {
 
   socket.on('room made successfully', () => {
     closeDialog();
+    router.push(`/game/${roomName}`)
   })
 
   return (

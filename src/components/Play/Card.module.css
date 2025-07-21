@@ -4,4 +4,14 @@
     border: 1px solid black;
     border-radius: 1rem;
     background-color: white;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cardsContainer h1 {
+    color: black;
+    font-size: 3rem;
 }
