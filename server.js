@@ -3,13 +3,13 @@ import next from "next";
 import { Server } from "socket.io";
 
 const dev = process.env.NODE_ENV !== "production";
-const hostname = "localhost";
-const port = 3000;
+// const hostname = "localhost";
+const port = parseInt(process.env.PORT || "3000", 10);
+const hostname = process.env.HOST || "0.0.0.0"; // "0.0.0.0" works for cloud deployments
+// const port = 3000;
 // when using middleware `hostname` and `port` must be provided below
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
-
-const roomsMeta = new Map();
 
 app.prepare().then(() => {
   const httpServer = createServer(handler);
@@ -90,6 +90,10 @@ app.prepare().then(() => {
             console.log('join room failed');
             socket.emit("join room", "failure");
         }
+    })
+
+    socket.on("correct answer", (roomName, userID) => {
+        
     })
   });
 

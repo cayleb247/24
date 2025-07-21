@@ -29,7 +29,7 @@
 .answerContainer input {
   background-color: transparent;
   box-sizing: border-box;
-  padding: 0.5rem;
+  padding: 0.5rem 0rem 0.5rem 0rem;
   border: none;
   border-bottom: 0.125rem solid rgb(17, 71, 189);
   width: 100%;
@@ -79,13 +79,22 @@
 }
 
 .cardThree {
-  grid-row: 2/3;
+  grid-row: 2 / 3;
   grid-column: 1 / 2;
   height: 100%;
 }
 
 .cardFour {
-  grid-row: 2/3;
+  grid-row: 2 / 3;
   grid-column: 2 / 3;
   height: 100%;
+}
+
+.playerScore {
+    grid-row: 1 / 2;
+    grid-column: 1 / 2;
+}
+
+.gameWon {
+    
 }
