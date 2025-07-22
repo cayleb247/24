@@ -14,7 +14,7 @@ export default function Game({ params }) {
   const router = useRouter();
 
   const [roomFull, setRoomFull] = useState("");
-  const { slug } = use(params);
+  const { slug } = use(params); // room name
 
   useEffect(() => {
     const handleRoomFull = (roomFull) => {
@@ -69,7 +69,7 @@ export default function Game({ params }) {
   return (
     <div className={styles.gameContainer}>
       {gameLoading && <Loading roomName={slug}/>}
-      {gameStarted && <Play />}
+      {gameStarted && <Play roomName={slug}/>}
     </div>
   );
 }

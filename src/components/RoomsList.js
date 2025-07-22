@@ -9,7 +9,6 @@ export default function RoomsList(props) {
   const [filtered, setFiltered] = useState([]);
 
   useEffect(() => {
-    console.log(rooms, filtered);
 
     const handleRooms = (rooms) => {
       console.log("Received rooms:", rooms);

@@ -4,14 +4,17 @@ import { useEffect, useState, useRef } from "react";
 import { SOLVABLE_SETS } from "@/constants/data";
 import { evaluate } from "mathjs";
 import { useRouter } from "next/navigation";
+import { socket } from "@/socket";
 
-export default function Play() {
+export default function Play(props) {
   const router = useRouter();
 
   const [currentCards, setCurrentCards] = useState([]);
   const [answerError, setAnswerError] = useState(null);
   const [gameWon, setGameWon] = useState(false);
   const [currentScore, setCurrentScore] = useState(0);
+  const [gameRole, setGameRole] = useState(null); // whether you're the host or the guest
+  const [playersReady, setPlayersReady] = useState(false); // state to ensure both players are ready before setting up sockets
 
   const formRef = useRef();
 
@@ -27,25 +30,14 @@ export default function Play() {
     return [...setA].every((elem) => setB.has(elem));
   }
 
-  //   function evaluateLeftRight(numArray, opArray) {
-  //     // Evaluates without order of operations using an array of numbers (len four) and an array of operations (len three)
-  //     console.log(numArray, opArray);
-
-  //     let expressionOne = numArray[0].concat(opArray[0], numArray[1]);
-  //     console.log("expression one", expressionOne);
-  //     let expressionTwo = numArray[2].concat(opArray[2], numArray[3]);
-  //     console.log("expression two", expressionTwo);
-  //     let resultOne = evaluate(expressionOne).toString();
-  //     let resultTwo = evaluate(expressionTwo).toString();
-  //     let expressionThree = resultOne.concat(opArray[1], resultTwo);
-
-  //     return evaluate(expressionThree);
-  //   }
-
-  function newCards() {
+  function sendCards() {
+    console.log('sending cards');
     const randomIndex = Math.floor(Math.random() * SOLVABLE_SETS.length);
     const randomCardSet = SOLVABLE_SETS[randomIndex];
+    console.log("new cards", randomCardSet);
+
     setCurrentCards(randomCardSet);
+    socket.emit("send current cards", randomCardSet, props.roomName);
   }
 
   function checkAnswer(event) {
@@ -94,7 +86,7 @@ export default function Play() {
     console.log(rawAnswer);
 
     if (evaluate(rawAnswer) == 24) {
-      newCards();
+      sendCards();
       setCurrentScore(currentScore + 1);
       formRef.current.reset();
     } else {
@@ -104,8 +96,35 @@ export default function Play() {
   }
 
   useEffect(() => {
-    newCards();
+    socket.on("receive game role", (role) => {
+      setGameRole(role);
+    });
+    socket.emit("get game role", props.roomName);
   }, []);
+
+  useEffect(() => {
+    console.log('receiving current cards!');
+    socket.on("receive current cards", (cardList) => {
+      console.log("cards received!");
+      setCurrentCards(cardList);
+    });
+
+    socket.on("both players ready", () => {
+      setPlayersReady(true);
+    })
+
+    socket.emit("player ready", props.roomName) // verify both players are ready
+
+    return () => {
+      socket.off("receive current cards");
+    };
+  }, []);
+
+  useEffect(() => {
+    if (gameRole === "host") {
+      sendCards();
+    }
+  }, [playersReady]);
 
   useEffect(() => {
     if (currentScore == 3) {
@@ -144,7 +163,7 @@ export default function Play() {
       {gameWon && (
         <div className={styles.gameWon}>
           <h1>You Won!</h1>
-          <button onClick={() => router.push('/')}>Return Home</button>
+          <button onClick={() => router.push("/")}>Return Home</button>
         </div>
       )}
     </div>

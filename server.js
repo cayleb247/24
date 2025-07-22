@@ -11,6 +11,8 @@ const hostname = process.env.HOST || "0.0.0.0"; // "0.0.0.0" works for cloud dep
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
+const roomsMeta = new Map();
+
 app.prepare().then(() => {
   const httpServer = createServer(handler);
 
@@ -56,8 +58,8 @@ app.prepare().then(() => {
         socket.emit("room made successfully");
       }
 
-      console.log('right before joining')
       socket.join(roomName);
+      roomsMeta.set(roomName, {host: socket.id, guest: null, ready: []});
     });
 
     socket.on("request room full", (slug) => {
@@ -93,6 +95,10 @@ app.prepare().then(() => {
             socket.join(roomName);
             socket.emit("join room", "successful");
             socket.to(roomName).emit("start game")
+
+            const roomMeta = roomsMeta.get(roomName); // Assign meta data
+            roomMeta.guest = socket.id;
+
         } else {
             console.log('join room failed');
             socket.emit("join room", "failure");
@@ -101,11 +107,51 @@ app.prepare().then(() => {
 
     socket.on("request room leave", (roomName) => {
       socket.leave(roomName);
+
+      // Meta information
+
+      const roomMeta = roomsMeta.get(roomName);
+      
+      if (roomMeta.host == socket.id) {
+        roomMeta.host = roomMeta.guest; // make the guest the new host
+        roomMeta.guest = null;
+      }
+      if (roomMeta.guest == socket.id) roomMeta.guest=null;
+      
+      if (!roomMeta.guest && !roomMeta.host) { // delete room if both players aren't in it
+        roomsMeta.delete(roomName);
+      }
+
+    });
+
+    socket.on("get game role", (roomName) => {
+      const roomMeta = roomsMeta.get(roomName);
+
+      if (roomMeta.host == socket.id) {
+        socket.emit("receive game role", "host")
+      } else if (roomMeta.guest == socket.id) {
+        socket.emit("receive game role", "guest")
+      }
+      
+    })
+
+    socket.on("player ready", (roomName) => {
+      const room = roomsMeta.get(roomName);
+
+      room.ready.push(socket.id);
+
+      if (room.ready.length == 2) {
+        socket.to(roomName).emit("both players ready");
+      }
+    })
+
+    socket.on("send current cards", (cardList, roomName) => {
+      socket.to(roomName).emit("receive current cards", cardList);
     })
 
     socket.on("correct answer", (roomName, userID) => {
         
-    })
+    });
   });
 
   httpServer
