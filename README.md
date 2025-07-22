@@ -1,36 +1,17 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 24
 
-## Getting Started
+This is a time-old classic where players attempt to make the number 24 by manipulating four numbers using standard arithmetic operations (+, -, *, /).
 
-First, run the development server:
+### Creating a Room -
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Make a room by clicking the create room button on the `/room` page. (Note: creating a private room doesn't work yet). Then, wait for another user to join your room.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Gameplay -
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+Place an expression that uses the four numbers displayed that evaluates to 24 in the input bar. Standard order of operations apply. Only other character allowed besides numbers and operations are parantheses.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Once game is completed, it will be a race to find an expression that evaluates to 24. Currently, players are just finding 3 expressions to win and are not synced with opponent.
 
-## Learn More
+### Known bugs -
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Rooms sometimes continue to be displayed even when no one is in them.
