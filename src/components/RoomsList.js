@@ -4,11 +4,13 @@ import { socket } from "@/socket.js";
 import { useEffect, useState } from "react";
 
 export default function RoomsList(props) {
-  const [search, setSearch] = useState(props.search);
+  // const [search, setSearch] = useState(props.search);
   const [rooms, setRooms] = useState([]);
+  const [filtered, setFiltered] = useState([]);
 
   useEffect(() => {
-    socket.emit("request rooms");
+    console.log(rooms, filtered);
+
     const handleRooms = (rooms) => {
       console.log("Received rooms:", rooms);
       setRooms(rooms);
@@ -16,14 +18,20 @@ export default function RoomsList(props) {
 
     socket.on("send rooms", handleRooms);
 
+    socket.emit("request rooms");
+
     return () => {
       socket.off("send rooms", handleRooms);
     };
   }, []); // Only run once on mount
 
-  const filtered = rooms.filter((roomName) =>
-    roomName.toLowerCase().includes(search.toLowerCase())
-  );
+  useEffect(() => {
+    setFiltered(
+      rooms.filter((roomName) =>
+        roomName.toLowerCase().includes(props.search.toLowerCase())
+      )
+    );
+  }, [rooms, props.search]);
 
   return (
     <div className={styles.roomsListContainer}>

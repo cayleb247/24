@@ -36,7 +36,7 @@ export default function CreateRoomDialog(props) {
   })
 
   socket.on('room made successfully', () => {
-    closeDialog();
+    // closeDialog();
     router.push(`/game/${roomName}`)
   })
 

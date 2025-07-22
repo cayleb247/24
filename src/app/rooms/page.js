@@ -12,7 +12,8 @@ export default function Rooms() {
 
   useEffect(() => {
     console.log("Connected to socket:", socket.id); // might be undefined immediately
-  }, []);
+    console.log(search)
+  }, [search]);
 
   return (
     <div className={styles.container}>
@@ -23,6 +24,7 @@ export default function Rooms() {
           type="text"
           placeholder="search rooms"
           name="search"
+          autoComplete="off"
           onChange={(e) => {
             setSearch(e.target.value);
           }}

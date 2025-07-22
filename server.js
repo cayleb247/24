@@ -27,7 +27,10 @@ app.prepare().then(() => {
         if (io.sockets.sockets.get(roomName)) continue;
 
         customRooms.push(roomName);
+
       }
+
+      console.log(customRooms);
 
       socket.emit("send rooms", customRooms)
     });
@@ -35,14 +38,17 @@ app.prepare().then(() => {
     socket.on("room creation", (roomName) => {
       const rooms = io.sockets.adapter.rooms;
       let customRooms = [];
+      let roomSizes = [];
       for (let [roomName, room] of rooms) {
         // If the room name matches a socket ID, skip it
         if (io.sockets.sockets.get(roomName)) continue;
 
         customRooms.push(roomName);
+        roomSizes.push(io.sockets.adapter.rooms.get(roomName).size)
       }
 
-      console.log(customRooms);
+
+      console.log(customRooms, roomSizes);
       if (customRooms.includes(roomName)) {
         socket.emit("room name taken");
         return;
@@ -50,6 +56,7 @@ app.prepare().then(() => {
         socket.emit("room made successfully");
       }
 
+      console.log('right before joining')
       socket.join(roomName);
     });
 
@@ -90,6 +97,10 @@ app.prepare().then(() => {
             console.log('join room failed');
             socket.emit("join room", "failure");
         }
+    })
+
+    socket.on("request room leave", (roomName) => {
+      socket.leave(roomName);
     })
 
     socket.on("correct answer", (roomName, userID) => {

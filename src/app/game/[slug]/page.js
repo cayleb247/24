@@ -5,6 +5,7 @@ import { socket } from "@/socket.js";
 import Play from "@/components/Play/Play.js";
 import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Loading from "@/components/Loading.js";
 
 export default function Game({ params }) {
   const [gameLoading, setGameLoading] = useState(false);
@@ -67,7 +68,7 @@ export default function Game({ params }) {
 
   return (
     <div className={styles.gameContainer}>
-      {gameLoading && <div> game is loading !</div>}
+      {gameLoading && <Loading roomName={slug}/>}
       {gameStarted && <Play />}
     </div>
   );
