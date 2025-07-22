@@ -6,7 +6,7 @@ export default function Loading(props) {
   const router = useRouter();
 
   function leaveRoom() {
-    socket.emit("leave room", props.roomName)
+    socket.emit("request room leave", props.roomName)
     router.push('/')
   }
 
