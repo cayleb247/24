@@ -50,6 +50,7 @@ export default function CreateRoomDialog(props) {
             name="roomName"
             id="roomName"
             placeholder="room name"
+            autoComplete="off"
           />
           {roomNameTaken && <p style={{color: "rgb(209, 48, 48)", fontStyle: "italic"}}>room name taken</p>}
         </div>
@@ -71,6 +72,7 @@ export default function CreateRoomDialog(props) {
               name="roomCode"
               id="roomCode"
               placeholder="room code"
+              autoComplete="off"
             />
           </div>
         )}

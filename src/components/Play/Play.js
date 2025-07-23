@@ -13,6 +13,7 @@ export default function Play(props) {
   const [answerError, setAnswerError] = useState(null);
   const [gameWon, setGameWon] = useState(false);
   const [currentScore, setCurrentScore] = useState(0);
+  const [opponentScore, setOpponentScore] = useState(0);
   const [gameRole, setGameRole] = useState(null); // whether you're the host or the guest
   const [playersReady, setPlayersReady] = useState(false); // state to ensure both players are ready before setting up sockets
 
@@ -61,8 +62,11 @@ export default function Play(props) {
       setAnswerError("Too many numbers");
       return;
     } else if (numbers.length < 4) {
+      console.log(numbers);
       setAnswerError("Too few numbers");
       return;
+    } else {
+      setAnswerError(null);
     }
 
     const operations = answer.split(/\d+/).filter(Boolean);
@@ -89,6 +93,7 @@ export default function Play(props) {
       sendCards();
       setCurrentScore(currentScore + 1);
       formRef.current.reset();
+      setAnswerError(null);
     } else {
       setAnswerError("Incorrect Answer");
       return;
@@ -126,8 +131,8 @@ export default function Play(props) {
     }
   }, [playersReady]);
 
-  useEffect(() => {
-    if (currentScore == 3) {
+  useEffect(() => { // win condition
+    if (currentScore == 10) {
       setGameWon(true);
     }
   }, [currentScore]);
@@ -154,10 +159,11 @@ export default function Play(props) {
 
       <form onSubmit={checkAnswer} autoComplete="off" ref={formRef}>
         <div className={styles.answerContainer}>
-          <input type="text" name="answer" />
+          <input type="text" name="answer" autoComplete="off" />
           <h3>=</h3>
           <h3>24</h3>
         </div>
+        {answerError && <p style={{color: "rgb(209, 48, 48)", fontStyle: "italic"}}>{answerError}</p>}
         <input type="submit" className={styles.submitButton} />
       </form>
       {gameWon && (
