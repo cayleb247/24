@@ -5,6 +5,7 @@ import { SOLVABLE_SETS } from "@/constants/data";
 import { evaluate } from "mathjs";
 import { useRouter } from "next/navigation";
 import { socket } from "@/socket";
+import ScoreMeter from "@/components/ScoreMeter";
 
 export default function Play(props) {
   const router = useRouter();
@@ -12,8 +13,8 @@ export default function Play(props) {
   const [currentCards, setCurrentCards] = useState([]);
   const [answerError, setAnswerError] = useState(null);
   const [gameWon, setGameWon] = useState(false);
-  const [currentScore, setCurrentScore] = useState(0);
-  const [opponentScore, setOpponentScore] = useState(0);
+  const [currentScore, setCurrentScore] = useState(10);
+  const [opponentScore, setOpponentScore] = useState(10);
   const [gameRole, setGameRole] = useState(null); // whether you're the host or the guest
   const [playersReady, setPlayersReady] = useState(false); // state to ensure both players are ready before setting up sockets
 
@@ -32,7 +33,7 @@ export default function Play(props) {
   }
 
   function sendCards() {
-    console.log('sending cards');
+    console.log("sending cards");
     const randomIndex = Math.floor(Math.random() * SOLVABLE_SETS.length);
     const randomCardSet = SOLVABLE_SETS[randomIndex];
     console.log("new cards", randomCardSet);
@@ -91,7 +92,9 @@ export default function Play(props) {
 
     if (evaluate(rawAnswer) == 24) {
       sendCards();
-      setCurrentScore(currentScore + 1);
+      setCurrentScore(currentScore + 1); // add to current score
+      socket.emit("send current score", currentScore + 1, props.roomName, socket.id); // send new current score to opponent
+      setOpponentScore(opponentScore - 1); // subtract from opponent's score
       formRef.current.reset();
       setAnswerError(null);
     } else {
@@ -101,6 +104,19 @@ export default function Play(props) {
   }
 
   useEffect(() => {
+    socket.on("receive opponent score", (score, userID) => {
+      console.log('opponent score received', score)
+      if (userID !== socket.id) {
+        setOpponentScore(score);
+        setCurrentScore(20 - score); // your new score
+      }
+    });
+    return () => {
+      socket.off("receive opponent score");
+    };
+  }, []);
+
+  useEffect(() => {
     socket.on("receive game role", (role) => {
       setGameRole(role);
     });
@@ -108,7 +124,7 @@ export default function Play(props) {
   }, []);
 
   useEffect(() => {
-    console.log('receiving current cards!');
+    console.log("receiving current cards!");
     socket.on("receive current cards", (cardList) => {
       console.log("cards received!");
       setCurrentCards(cardList);
@@ -116,9 +132,9 @@ export default function Play(props) {
 
     socket.on("both players ready", () => {
       setPlayersReady(true);
-    })
+    });
 
-    socket.emit("player ready", props.roomName) // verify both players are ready
+    socket.emit("player ready", props.roomName); // verify both players are ready
 
     return () => {
       socket.off("receive current cards");
@@ -131,8 +147,9 @@ export default function Play(props) {
     }
   }, [playersReady]);
 
-  useEffect(() => { // win condition
-    if (currentScore == 10) {
+  useEffect(() => {
+    // win condition
+    if (currentScore == 20) {
       setGameWon(true);
     }
   }, [currentScore]);
@@ -140,7 +157,19 @@ export default function Play(props) {
   return (
     <div className={styles.playContainer}>
       <div className={styles.playerScore}>
+        <h3>Your Score</h3>
         <h1>{currentScore}</h1>
+      </div>
+      <div className={styles.opponentScore}>
+        <h3>Opponent&apos;s Score</h3>
+        <h1>{opponentScore}</h1>
+      </div>
+      <div className={styles.scoreMeterContainer}>
+        <h3 style={{ fontStyle: "italic" }}>Race to 20!</h3>
+        <ScoreMeter
+          opponentScore={opponentScore}
+          playerScore={currentScore}
+        ></ScoreMeter>
       </div>
       <div className={styles.cardsContainer}>
         <div className={styles.cardOne}>
@@ -163,7 +192,11 @@ export default function Play(props) {
           <h3>=</h3>
           <h3>24</h3>
         </div>
-        {answerError && <p style={{color: "rgb(209, 48, 48)", fontStyle: "italic"}}>{answerError}</p>}
+        {answerError && (
+          <p style={{ color: "rgb(209, 48, 48)", fontStyle: "italic" }}>
+            {answerError}
+          </p>
+        )}
         <input type="submit" className={styles.submitButton} />
       </form>
       {gameWon && (

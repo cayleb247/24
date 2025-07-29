@@ -152,6 +152,10 @@ app.prepare().then(() => {
     socket.on("correct answer", (roomName, userID) => {
         
     });
+
+    socket.on("send current score", (score, roomName, userID) => {
+      socket.to(roomName).emit("receive opponent score", score, userID) // send userID to track player and opponent
+    })
   });
 
   httpServer
