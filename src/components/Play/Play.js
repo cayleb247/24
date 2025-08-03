@@ -12,11 +12,11 @@ export default function Play(props) {
 
   const [currentCards, setCurrentCards] = useState([]);
   const [answerError, setAnswerError] = useState(null);
-  const [gameWon, setGameWon] = useState(false);
   const [currentScore, setCurrentScore] = useState(10);
   const [opponentScore, setOpponentScore] = useState(10);
   const [gameRole, setGameRole] = useState(null); // whether you're the host or the guest
   const [playersReady, setPlayersReady] = useState(false); // state to ensure both players are ready before setting up sockets
+  const [pointsScored, setPointsScored] = useState(0);
 
   const formRef = useRef();
 
@@ -93,6 +93,7 @@ export default function Play(props) {
     if (evaluate(rawAnswer) == 24) {
       sendCards();
       setCurrentScore(currentScore + 1); // add to current score
+      setPointsScored((prev) => prev + 1);
       socket.emit("send current score", currentScore + 1, props.roomName, socket.id); // send new current score to opponent
       setOpponentScore(opponentScore - 1); // subtract from opponent's score
       formRef.current.reset();
@@ -149,9 +150,15 @@ export default function Play(props) {
 
   useEffect(() => {
     // win condition
+
     if (currentScore == 20) {
-      setGameWon(true);
+      router.push(`/game/${props.roomName}/win`);
+      socket.emit("game finished", props.roomName, 'win', socket.id, pointsScored);
+    } else if (opponentScore == 20) {
+      router.push(`/game/${props.roomName}/lose`);
+      socket.emit("game finished", props.roomName, 'loss', socket.id, pointsScored);
     }
+
   }, [currentScore]);
 
   return (
@@ -199,12 +206,6 @@ export default function Play(props) {
         )}
         <input type="submit" className={styles.submitButton} />
       </form>
-      {gameWon && (
-        <div className={styles.gameWon}>
-          <h1>You Won!</h1>
-          <button onClick={() => router.push("/")}>Return Home</button>
-        </div>
-      )}
     </div>
   );
 }

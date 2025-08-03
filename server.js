@@ -21,6 +21,10 @@ app.prepare().then(() => {
   io.on("connection", (socket) => {
     console.log(`User connected: ${socket.id}`);
 
+    socket.on("send error", (message, userID) => {
+      socket.to(userID).emit("send error", message)
+    })
+
     socket.on("request rooms", () => {
       const rooms = io.sockets.adapter.rooms;
       let customRooms = [];
@@ -59,7 +63,7 @@ app.prepare().then(() => {
       }
 
       socket.join(roomName);
-      roomsMeta.set(roomName, {host: socket.id, guest: null, ready: []});
+      roomsMeta.set(roomName, {host: socket.id, guest: null, ready: [], winner: null, loser: null, winningScore: 0, losingScore: 0});
     });
 
     socket.on("request room full", (slug) => {
@@ -149,12 +153,34 @@ app.prepare().then(() => {
       socket.to(roomName).emit("receive current cards", cardList);
     })
 
-    socket.on("correct answer", (roomName, userID) => {
+    // socket.on("correct answer", (roomName, userID) => {
         
-    });
+    // });
 
     socket.on("send current score", (score, roomName, userID) => {
       socket.to(roomName).emit("receive opponent score", score, userID) // send userID to track player and opponent
+    })
+
+    socket.on("game finished", (roomName, result, userID, pointsScored) => {
+      const room = roomsMeta.get(roomName);
+      if (result == "win") {
+        room.winner = userID;
+        room.winningScore = pointsScored;
+      } else if (result == "loss") {
+        room.loser = userID;
+        room.losingScore = pointsScored;
+      }
+    })
+
+    socket.on("get game results", (roomName, userID) => {
+      const room = roomsMeta.get(roomName);
+      if (room.winner == null || room.loser == null) {
+        socket.to(roomName).emit("get game results", null, null);
+      } else if (room.winner == userID) {
+        socket.to(roomName).emit("get game results", "win", room.winningScore);
+      } else if (room.loser == userID) {
+        socket.to(roomName).emit("get game results", "loss", room.losingScore);
+      }
     })
   });
 

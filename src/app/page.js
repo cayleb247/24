@@ -13,7 +13,7 @@ export default function Home() {
 
   useEffect(() => {
     if (socket.connected) {
-      socket.on("receive error", (error) => {
+      socket.on("send error", (error) => {
         setErrorMessage(error);
       })
     }
@@ -31,7 +31,7 @@ export default function Home() {
           <button>Play</button>
         </div>
       </div>
-      {errorMessage && <div>{errorMessage}</div>}
+      {errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
     </div>
   );
 }
