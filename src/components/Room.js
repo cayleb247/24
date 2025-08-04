@@ -9,7 +9,7 @@ export default function Room(props) {
       if (status === "successful") {
         redirect(`/game/${props.roomName}`);
       } else if (status === "failure") {
-        socket.emit("send error", "room full", socket.id);
+        socket.emit("send error", "room full");
         redirect("/");
       }
     };

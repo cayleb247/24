@@ -11,18 +11,22 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
+    setErrorMessage(null);
+
     const handleErrorMessage = (error) => {
-      setErrorMessage(error)
-      console.log('current error', error);
-    }
-    socket.on("send error", handleErrorMessage);
+      setErrorMessage(error);
+      console.log("current error", error);
+    };
+    socket.on("request error", handleErrorMessage);
+
+    socket.emit("request error");
 
     console.log("about to leave all rooms");
     socket.emit("leave all rooms");
 
     return () => {
-      socket.off("send error", handleErrorMessage);
-    }
+      socket.off("request error", handleErrorMessage);
+    };
   }, []);
 
   return (
@@ -40,9 +44,7 @@ export default function Home() {
           <button>Play</button>
         </div>
       </div>
-      {errorMessage && (
-        <div className={styles.errorMessage}>{errorMessage}</div>
-      )}
+      {errorMessage && <div className={styles.errorMessage}>Oops! {errorMessage}</div>}
     </div>
   );
 }

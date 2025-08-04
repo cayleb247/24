@@ -39,11 +39,11 @@ export default function Game({ params }) {
     if (roomFull === true) {
       console.log("room full");
       router.push("/");
-      socket.emit("join room error", "room is full");
+      socket.emit("send error", "room is full");
     } else if (roomFull === null) {
       console.log("room doesn't exist");
       router.push("/");
-      socket.emit("join room error", "room does not exist");
+      socket.emit("send error", "room does not exist");
     }
   }, [roomFull]);
 

@@ -5,6 +5,7 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  position: relative;
 }
 
 .homeContainer {
@@ -55,8 +56,11 @@
 
 .errorMessage {
   position: absolute;
-  top: 2;
-  border-radius: 1rem;
+  top: 1rem;
+  border-radius: 0.75rem;
   background-color: rgb(239, 180, 86);
-  border: 1px solid rgb(196, 148, 71);
+  border: 2px solid rgb(196, 148, 71);
+  padding: 1rem;
+  color: rgb(126, 95, 45);
+  font-size: 1.25rem;
 }

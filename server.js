@@ -12,6 +12,7 @@ const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
 const roomsMeta = new Map();
+let pendingErrors;
 
 app.prepare().then(() => {
   const httpServer = createServer(handler);
@@ -21,9 +22,14 @@ app.prepare().then(() => {
   io.on("connection", (socket) => {
     console.log(`User connected: ${socket.id}`);
 
-    socket.on("send error", (message, userID) => {
-      io.to(userID).emit("send error", message);
+    socket.on("send error", (message) => {
+      pendingErrors = message;
     });
+
+    socket.on("request error", () => {
+      socket.emit("request error", pendingErrors);
+      pendingErrors = null;
+    })
 
     socket.on("request rooms", () => {
       const rooms = io.sockets.adapter.rooms;
