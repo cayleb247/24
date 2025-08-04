@@ -25,9 +25,9 @@ export default function Game({ params }) {
     socket.emit("request room full", slug);
 
     socket.on("start game", () => {
-        setGameStarted(true);
-        setGameLoading(false);
-    })
+      setGameStarted(true);
+      setGameLoading(false);
+    });
 
     // console.log('current status of room', roomFull)
     return () => {
@@ -68,8 +68,8 @@ export default function Game({ params }) {
 
   return (
     <div className={styles.gameContainer}>
-      {gameLoading && <Loading roomName={slug}/>}
-      {gameStarted && <Play roomName={slug}/>}
+      {gameLoading && <Loading roomName={slug} />}
+      {gameStarted && <Play roomName={slug} />}
     </div>
   );
 }

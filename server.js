@@ -44,7 +44,7 @@ app.prepare().then(() => {
       const rooms = io.sockets.adapter.rooms;
       let customRooms = [];
       let roomSizes = [];
-      
+
       for (let [roomName, room] of rooms) {
         // If the room name matches a socket ID, skip it
         if (io.sockets.sockets.get(roomName)) continue;
@@ -62,6 +62,7 @@ app.prepare().then(() => {
       }
 
       socket.join(roomName);
+
       roomsMeta.set(roomName, {
         host: socket.id,
         guest: null,
@@ -71,13 +72,15 @@ app.prepare().then(() => {
         winningScore: 0,
         losingScore: 0,
       });
+
+      console.log('rooms you are in (creating)', socket.rooms);
     });
 
     socket.on("request room full", (slug) => {
       const room = io.sockets.adapter.rooms.get(slug);
       // console.log('room ', room)
-
-      // console.log(room.size);
+      console.log(io.sockets.adapter.rooms, slug);
+      console.log('room size', room.size);
 
       let roomFull;
       if (!room) {
@@ -97,14 +100,16 @@ app.prepare().then(() => {
       socket.emit("return room members", Array.from(room));
     });
 
-    socket.on("request room join", (roomName) => {
+    socket.on("request room join", async (roomName) => {
       console.log("request for room join received");
+      console.log('rooms you are in (joining)', socket.rooms);
       const room = io.sockets.adapter.rooms.get(roomName);
       const roomMeta = roomsMeta.get(roomName);
+      console.log(roomMeta);
 
-      if (room && room.size < 2 && roomMeta) {
+      if (room && room.size < 2 && roomMeta && roomMeta.ready.length != 2) {
         console.log("join room success");
-        socket.join(roomName);
+        await socket.join(roomName);
         socket.emit("join room", "successful");
         socket.to(roomName).emit("start game");
 
@@ -136,10 +141,12 @@ app.prepare().then(() => {
     });
 
     socket.on("leave all rooms", () => {
-      for (const room of socket.rooms) {
-        if (room !== socket.id) {
-          socket.leave(room);
-        }
+      const roomsToLeave = Array.from(socket.rooms).filter(
+        (r) => r !== socket.id
+      );
+      console.log("rooms to leave");
+      for (const room of roomsToLeave) {
+        socket.leave(room);
       }
     });
 
@@ -179,11 +186,11 @@ app.prepare().then(() => {
       const room = roomsMeta.get(roomName);
       if (result == "win") {
         room.winner = userID;
-        console.log('winning score updated');
+        console.log("winning score updated");
         room.winningScore = pointsScored;
       } else if (result == "loss") {
         room.loser = userID;
-        console.log('losing score updated');
+        console.log("losing score updated");
         room.losingScore = pointsScored;
       }
     });
@@ -191,16 +198,20 @@ app.prepare().then(() => {
     socket.on("get game results", (roomName, userID) => {
       const room = roomsMeta.get(roomName);
       if (room.winner == null || room.loser == null) {
-        console.log('no winner');
+        console.log("no winner");
         socket.emit("get game results", null, null);
       } else if (room.winner == userID) {
-        console.log('you win', room.winningScore);
+        console.log("you win", room.winningScore);
         socket.emit("get game results", "win", room.winningScore);
       } else if (room.loser == userID) {
-        console.log('you lost', room.losingScore);
+        console.log("you lost", room.losingScore);
         socket.emit("get game results", "loss", room.losingScore);
       }
     });
+
+    socket.on("disconnect", () => {
+      console.log("disconnect");
+    })
   });
 
   httpServer

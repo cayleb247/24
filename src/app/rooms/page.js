@@ -14,6 +14,7 @@ export default function Rooms() {
     console.log("Connected to socket:", socket.id); // might be undefined immediately
     console.log(search);
     socket.emit("leave all rooms");
+    console.log("leaving all rooms!")
   }, [search]);
 
   return (
