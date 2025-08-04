@@ -152,11 +152,11 @@ export default function Play(props) {
   useEffect(() => {
     // win condition
 
-    if (currentScore == 11) {
+    if (currentScore == 20) {
       router.push(`/game/${props.roomName}/win`);
       console.log("current points scored", pointsScored);
       socket.emit("game finished", props.roomName, 'win', socket.id, pointsScored);
-    } else if (opponentScore == 11) {
+    } else if (opponentScore == 20) {
       router.push(`/game/${props.roomName}/lose`);
       socket.emit("game finished", props.roomName, 'loss', socket.id, pointsScored);
     }
