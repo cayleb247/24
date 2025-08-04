@@ -10,8 +10,8 @@ Make a room by clicking the create room button on the `/room` page. (Note: creat
 
 Place an expression that uses the four numbers displayed that evaluates to 24 in the input bar. Standard order of operations apply. Only other character allowed besides numbers and operations are parantheses.
 
-Once game is completed, it will be a race to find an expression that evaluates to 24. Currently, players are just finding 3 expressions to win and are not synced with opponent.
+Once game is completed, it will be a race to find an expression that evaluates to 24.
 
 ### Known bugs -
 
-Rooms sometimes continue to be displayed even when no one is in them.
+Rooms sometimes continue to be displayed even when no one is in them. (Not really a bug, usually someone is still in there)
