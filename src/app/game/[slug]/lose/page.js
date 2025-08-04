@@ -6,7 +6,7 @@ import styles from "../game.module.css";
 import { socket } from "@/socket.js";
 
 export default function Lose({ params }) {
-  const [points, setPoints] = useState(null);
+  const [points, setPoints] = useState(0);
 
   const { slug } = use(params); // room name
 

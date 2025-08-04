@@ -16,6 +16,8 @@ export default function Home() {
       socket.on("send error", (error) => {
         setErrorMessage(error);
       })
+      console.log("about to leave all rooms");
+      socket.emit("leave all rooms");
     }
   }, []);
 

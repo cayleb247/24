@@ -92,8 +92,9 @@ export default function Play(props) {
 
     if (evaluate(rawAnswer) == 24) {
       sendCards();
+      setPointsScored(pointsScored + 1);
       setCurrentScore(currentScore + 1); // add to current score
-      setPointsScored((prev) => prev + 1);
+      console.log("points scored", pointsScored);
       socket.emit("send current score", currentScore + 1, props.roomName, socket.id); // send new current score to opponent
       setOpponentScore(opponentScore - 1); // subtract from opponent's score
       formRef.current.reset();
@@ -151,10 +152,11 @@ export default function Play(props) {
   useEffect(() => {
     // win condition
 
-    if (currentScore == 20) {
+    if (currentScore == 11) {
       router.push(`/game/${props.roomName}/win`);
+      console.log("current points scored", pointsScored);
       socket.emit("game finished", props.roomName, 'win', socket.id, pointsScored);
-    } else if (opponentScore == 20) {
+    } else if (opponentScore == 11) {
       router.push(`/game/${props.roomName}/lose`);
       socket.emit("game finished", props.roomName, 'loss', socket.id, pointsScored);
     }

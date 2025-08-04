@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import styles from "./rooms.module.css";
 import RoomsList from "@/components/RoomsList";
 import CreateRoomDialog from "@/components/CreateRoomDialog";
-import { socket } from "@/socket.js"
+import { socket } from "@/socket.js";
 
 export default function Rooms() {
   const [search, setSearch] = useState("");
@@ -12,7 +12,8 @@ export default function Rooms() {
 
   useEffect(() => {
     console.log("Connected to socket:", socket.id); // might be undefined immediately
-    console.log(search)
+    console.log(search);
+    socket.emit("leave all rooms");
   }, [search]);
 
   return (
@@ -30,10 +31,17 @@ export default function Rooms() {
           }}
         />
         <RoomsList search={search}></RoomsList>
-        <button onClick={() => toggleDialog(true)} className={styles.createRoomButton}>Create Room</button>
+        <button
+          onClick={() => toggleDialog(true)}
+          className={styles.createRoomButton}
+        >
+          Create Room
+        </button>
       </div>
-      <CreateRoomDialog isOpen={dialogOpen} onClose={() => toggleDialog(false)} />
-
+      <CreateRoomDialog
+        isOpen={dialogOpen}
+        onClose={() => toggleDialog(false)}
+      />
     </div>
   );
 }

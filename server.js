@@ -22,8 +22,8 @@ app.prepare().then(() => {
     console.log(`User connected: ${socket.id}`);
 
     socket.on("send error", (message, userID) => {
-      socket.to(userID).emit("send error", message)
-    })
+      io.to(userID).emit("send error", message);
+    });
 
     socket.on("request rooms", () => {
       const rooms = io.sockets.adapter.rooms;
@@ -33,26 +33,25 @@ app.prepare().then(() => {
         if (io.sockets.sockets.get(roomName)) continue;
 
         customRooms.push(roomName);
-
       }
 
       console.log(customRooms);
 
-      socket.emit("send rooms", customRooms)
+      socket.emit("send rooms", customRooms);
     });
 
     socket.on("room creation", (roomName) => {
       const rooms = io.sockets.adapter.rooms;
       let customRooms = [];
       let roomSizes = [];
+      
       for (let [roomName, room] of rooms) {
         // If the room name matches a socket ID, skip it
         if (io.sockets.sockets.get(roomName)) continue;
 
         customRooms.push(roomName);
-        roomSizes.push(io.sockets.adapter.rooms.get(roomName).size)
+        roomSizes.push(io.sockets.adapter.rooms.get(roomName).size);
       }
-
 
       console.log(customRooms, roomSizes);
       if (customRooms.includes(roomName)) {
@@ -63,51 +62,59 @@ app.prepare().then(() => {
       }
 
       socket.join(roomName);
-      roomsMeta.set(roomName, {host: socket.id, guest: null, ready: [], winner: null, loser: null, winningScore: 0, losingScore: 0});
+      roomsMeta.set(roomName, {
+        host: socket.id,
+        guest: null,
+        ready: [],
+        winner: null,
+        loser: null,
+        winningScore: 0,
+        losingScore: 0,
+      });
     });
 
     socket.on("request room full", (slug) => {
+      const room = io.sockets.adapter.rooms.get(slug);
+      // console.log('room ', room)
 
-        const room = io.sockets.adapter.rooms.get(slug);
-        // console.log('room ', room)
+      // console.log(room.size);
 
-        // console.log(room.size);
-
-        let roomFull;
-        if (!room) {
-            roomFull = null;
-        } else if (room.size > 2) { // room size is compared after room has been joined (room.size = 1 during new room, etc.)
-            roomFull = true;
-        } else if (room.size <= 2) {
-            roomFull= false;
-        }
-        console.log(roomFull);
-        socket.emit("receive room full", roomFull)
-    })
+      let roomFull;
+      if (!room) {
+        roomFull = null;
+      } else if (room.size > 2) {
+        // room size is compared after room has been joined (room.size = 1 during new room, etc.)
+        roomFull = true;
+      } else if (room.size <= 2) {
+        roomFull = false;
+      }
+      console.log(roomFull);
+      socket.emit("receive room full", roomFull);
+    });
 
     socket.on("request room members", (slug) => {
-        const room = io.sockets.adapter.rooms.get(slug);
-        socket.emit('return room members', Array.from(room));
-    })
+      const room = io.sockets.adapter.rooms.get(slug);
+      socket.emit("return room members", Array.from(room));
+    });
 
     socket.on("request room join", (roomName) => {
-        console.log('request for room join received');
-        const room = io.sockets.adapter.rooms.get(roomName);
-        
-        if (room && room.size < 2) {
-            console.log('join room success');
-            socket.join(roomName);
-            socket.emit("join room", "successful");
-            socket.to(roomName).emit("start game")
+      console.log("request for room join received");
+      const room = io.sockets.adapter.rooms.get(roomName);
+      const roomMeta = roomsMeta.get(roomName);
 
-            const roomMeta = roomsMeta.get(roomName); // Assign meta data
-            roomMeta.guest = socket.id;
+      if (room && room.size < 2 && roomMeta) {
+        console.log("join room success");
+        socket.join(roomName);
+        socket.emit("join room", "successful");
+        socket.to(roomName).emit("start game");
 
-        } else {
-            console.log('join room failed');
-            socket.emit("join room", "failure");
-        }
-    })
+        const roomMeta = roomsMeta.get(roomName); // Assign meta data
+        roomMeta.guest = socket.id;
+      } else {
+        console.log("join room failed");
+        socket.emit("join room", "failure");
+      }
+    });
 
     socket.on("request room leave", (roomName) => {
       socket.leave(roomName);
@@ -115,29 +122,36 @@ app.prepare().then(() => {
       // Meta information
 
       const roomMeta = roomsMeta.get(roomName);
-      
+
       if (roomMeta.host == socket.id) {
         roomMeta.host = roomMeta.guest; // make the guest the new host
         roomMeta.guest = null;
       }
-      if (roomMeta.guest == socket.id) roomMeta.guest=null;
-      
-      if (!roomMeta.guest && !roomMeta.host) { // delete room if both players aren't in it
+      if (roomMeta.guest == socket.id) roomMeta.guest = null;
+
+      if (!roomMeta.guest && !roomMeta.host) {
+        // delete room if both players aren't in it
         roomsMeta.delete(roomName);
       }
+    });
 
+    socket.on("leave all rooms", () => {
+      for (const room of socket.rooms) {
+        if (room !== socket.id) {
+          socket.leave(room);
+        }
+      }
     });
 
     socket.on("get game role", (roomName) => {
       const roomMeta = roomsMeta.get(roomName);
 
       if (roomMeta.host == socket.id) {
-        socket.emit("receive game role", "host")
+        socket.emit("receive game role", "host");
       } else if (roomMeta.guest == socket.id) {
-        socket.emit("receive game role", "guest")
+        socket.emit("receive game role", "guest");
       }
-      
-    })
+    });
 
     socket.on("player ready", (roomName) => {
       const room = roomsMeta.get(roomName);
@@ -147,41 +161,46 @@ app.prepare().then(() => {
       if (room.ready.length == 2) {
         socket.to(roomName).emit("both players ready");
       }
-    })
+    });
 
     socket.on("send current cards", (cardList, roomName) => {
       socket.to(roomName).emit("receive current cards", cardList);
-    })
+    });
 
     // socket.on("correct answer", (roomName, userID) => {
-        
+
     // });
 
     socket.on("send current score", (score, roomName, userID) => {
-      socket.to(roomName).emit("receive opponent score", score, userID) // send userID to track player and opponent
-    })
+      socket.to(roomName).emit("receive opponent score", score, userID); // send userID to track player and opponent
+    });
 
     socket.on("game finished", (roomName, result, userID, pointsScored) => {
       const room = roomsMeta.get(roomName);
       if (result == "win") {
         room.winner = userID;
+        console.log('winning score updated');
         room.winningScore = pointsScored;
       } else if (result == "loss") {
         room.loser = userID;
+        console.log('losing score updated');
         room.losingScore = pointsScored;
       }
-    })
+    });
 
     socket.on("get game results", (roomName, userID) => {
       const room = roomsMeta.get(roomName);
       if (room.winner == null || room.loser == null) {
-        socket.to(roomName).emit("get game results", null, null);
+        console.log('no winner');
+        socket.emit("get game results", null, null);
       } else if (room.winner == userID) {
-        socket.to(roomName).emit("get game results", "win", room.winningScore);
+        console.log('you win', room.winningScore);
+        socket.emit("get game results", "win", room.winningScore);
       } else if (room.loser == userID) {
-        socket.to(roomName).emit("get game results", "loss", room.losingScore);
+        console.log('you lost', room.losingScore);
+        socket.emit("get game results", "loss", room.losingScore);
       }
-    })
+    });
   });
 
   httpServer
