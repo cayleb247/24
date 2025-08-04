@@ -1,15 +1,14 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import styles from "./CreateRoomDialog.module.css";
 import { socket } from "@/socket.js";
 import { useRouter } from "next/navigation";
 
-export default function CreateRoomDialog(props) {  
+export default function CreateRoomDialog(props) {
   const router = useRouter();
 
-  let roomName;  
-  
   const [isPrivate, togglePrivate] = useState(false);
   const [roomNameTaken, setRoomNameTaken] = useState(false);
+  const [roomName, setRoomName] = useState("");
 
   const dialogRef = useRef();
 
@@ -26,19 +25,29 @@ export default function CreateRoomDialog(props) {
     setRoomNameTaken(false); // room name isn't taken originally - later to be checked if repeat
     event.preventDefault();
     const formData = new FormData(event.target); // event.target is the <form>
-    roomName = formData.get("roomName");
-    socket.emit("room creation", roomName);
-
+    const name = formData.get("roomName");
+    setRoomName(name);
+    socket.emit("room creation", name);
   }
 
-  socket.on('room name taken', () => {
-    setRoomNameTaken(true);
-  })
+  useEffect(() => {
+    const handleRoomTaken = () => {
+      setRoomNameTaken(true)
+    }
+    const handleSuccessfulRoom = () => {
+      console.log("pushing to room", roomName);
+      router.push(`/game/${roomName}`);
+    }
+    socket.on("room name taken", handleRoomTaken);
 
-  socket.on('room made successfully', () => {
-    // closeDialog();
-    router.push(`/game/${roomName}`)
-  })
+    socket.on("room made successfully", handleSuccessfulRoom);
+
+    return () => {
+      socket.off("room name taken", handleRoomTaken);
+      socket.off("room made successfully", handleSuccessfulRoom);
+    }
+      
+  });
 
   return (
     <dialog ref={dialogRef} className={styles.dialogContainer}>
@@ -52,7 +61,11 @@ export default function CreateRoomDialog(props) {
             placeholder="room name"
             autoComplete="off"
           />
-          {roomNameTaken && <p style={{color: "rgb(209, 48, 48)", fontStyle: "italic"}}>room name taken</p>}
+          {roomNameTaken && (
+            <p style={{ color: "rgb(209, 48, 48)", fontStyle: "italic" }}>
+              room name taken
+            </p>
+          )}
         </div>
 
         <div className={styles.privacyContainer}>
