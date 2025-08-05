@@ -8,13 +8,15 @@ export default function CreateRoomDialog(props) {
 
   const [isPrivate, togglePrivate] = useState(false);
   const [roomNameTaken, setRoomNameTaken] = useState(false);
-  const [roomName, setRoomName] = useState("");
 
   const dialogRef = useRef();
+  const roomNameRef = useRef("");
 
-  if (props.isOpen && dialogRef.current) {
-    dialogRef.current.showModal(); // imperative DOM method
-  }
+  useEffect(() => {
+    if (props.isOpen && dialogRef.current) {
+      dialogRef.current.showModal();
+    }
+  }, [props.isOpen]);
 
   function closeDialog() {
     dialogRef.current.close();
@@ -26,28 +28,27 @@ export default function CreateRoomDialog(props) {
     event.preventDefault();
     const formData = new FormData(event.target); // event.target is the <form>
     const name = formData.get("roomName");
-    setRoomName(name);
+
+    roomNameRef.current = name;
     socket.emit("room creation", name);
   }
 
   useEffect(() => {
     const handleRoomTaken = () => {
-      setRoomNameTaken(true)
-    }
+      setRoomNameTaken(true);
+    };
     const handleSuccessfulRoom = () => {
-      console.log("pushing to room", roomName);
-      router.push(`/game/${roomName}`);
-    }
-    socket.on("room name taken", handleRoomTaken);
+      router.push(`/game/${roomNameRef.current}`);
+    };
 
+    socket.on("room name taken", handleRoomTaken);
     socket.on("room made successfully", handleSuccessfulRoom);
 
     return () => {
       socket.off("room name taken", handleRoomTaken);
       socket.off("room made successfully", handleSuccessfulRoom);
-    }
-      
-  });
+    };
+  }, []);
 
   return (
     <dialog ref={dialogRef} className={styles.dialogContainer}>
